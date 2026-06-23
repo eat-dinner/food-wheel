@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今天吃什么？</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  overflow: hidden;
+}
+
+.title {
+  color: #f8f8f8;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  letter-spacing: 4px;
+  text-shadow: 0 2px 10px rgba(255,200,50,0.3);
+}
+
+.wheel-container {
+  position: relative;
+  width: 340px;
+  height: 340px;
+}
+
+.pointer {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-top: 36px solid #ff4757;
+  filter: drop-shadow(0 2px 6px rgba(255,71,87,0.5));
+  z-index: 10;
+}
+
+.pointer::after {
+  content: '';
+  position: absolute;
+  top: -36px;
+  left: -10px;
+  width: 20px; height: 20px;
+  background: #ff4757;
+  border-radius: 50%;
+}
+
+canvas {
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  box-shadow: 0 0 30px rgba(255,200,50,0.2), 0 0 60px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+
+.btn-wrap {
+  margin-top: 36px;
+}
+
+.spin-btn {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  color: white;
+  border: none;
+  padding: 14px 48px;
+  font-size: 20px;
+  font-weight: 700;
+  border-radius: 50px;
+  cursor: pointer;
+  letter-spacing: 3px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(238,90,36,0.4);
+}
+
+.spin-btn:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(238,90,36,0.6); }
+.spin-btn:active { transform: scale(0.95); }
+.spin-btn.disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.result-box {
+  margin-top: 24px;
+  color: #ffeaa7;
+  font-size: 22px;
+  font-weight: 700;
+  min-height: 36px;
+  text-align: center;
+  letter-spacing: 2px;
+  transition: all 0.4s;
+}
+
+.result-box.highlight {
+  color: #ff6b6b;
+  font-size: 26px;
+  text-shadow: 0 0 20px rgba(255,107,107,0.6);
+}
+
+.result-emoji {
+  font-size: 40px;
+  margin-top: 8px;
+  animation: pop 0.5s ease;
+}
+
+@keyframes pop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.3); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.sparkle {
+  position: fixed;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  animation: sparkle-fall 1.5s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes sparkle-fall {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(120px) scale(0.3); }
+}
+</style>
+</head>
+<body>
+
+<div class="title">🔥 今天吃什么？🔥</div>
+
+<div class="wheel-container">
+  <div class="pointer"></div>
+  <canvas id="wheel" width="680" height="680"></canvas>
+</div>
+
+<div class="btn-wrap">
+  <button class="spin-btn" id="spinBtn" onclick="spin()">开 转 ！</button>
+</div>
+
+<div class="result-box" id="result"></div>
+
+<script>
+const dishes = ['手撕鸡', '紫米饭团', '煎饼', '麻辣烫', '牛杂粉', '猪油捞面'];
+const emojis = ['🍗', '🍙', '🥞', '🌶️', '🍜', '🍝'];
+const colors = ['#e74c3c', '#f39c12', '#27ae60', '#8e44ad', '#2980b9', '#d35400'];
+const lightColors = ['#ff6b6b', '#ffc048', '#2ecc71', '#a569bd', '#5dade2', '#e67e22'];
+
+const canvas = document.getElementById('wheel');
+const ctx = canvas.getContext('2d');
+const centerX = 340, centerY = 340, radius = 320;
+const numSegments = dishes.length;
+const segAngle = (2 * Math.PI) / numSegments;
+
+let currentAngle = 0;
+let spinning = false;
+
+function drawWheel(angle) {
+  ctx.clearRect(0, 0, 680, 680);
+  ctx.save();
+  ctx.translate(centerX, centerY);
+  ctx.rotate(angle);
+
+  for (let i = 0; i < numSegments; i++) {
+    const startAngle = i * segAngle;
+    const endAngle = startAngle + segAngle;
+
+    // Segment fill
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, radius, startAngle, endAngle);
+    ctx.closePath();
+    const grad = ctx.createRadialGradient(0, 0, 40, 0, 0, radius);
+    grad.addColorStop(0, lightColors[i]);
+    grad.addColorStop(1, colors[i]);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Segment border
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Text
+    ctx.save();
+    ctx.rotate(startAngle + segAngle / 2);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Emoji
+    ctx.font = '32px sans-serif';
+    ctx.fillText(emojis[i], radius * 0.55, -8);
+
+    // Dish name
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 24px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 4;
+    ctx.fillText(dishes[i], radius * 0.55, 22);
+    ctx.shadowBlur = 0;
+
+    ctx.restore();
+  }
+
+  // Center circle
+  ctx.beginPath();
+  ctx.arc(0, 0, 42, 0, 2 * Math.PI);
+  const centerGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 42);
+  centerGrad.addColorStop(0, '#ffeaa7');
+  centerGrad.addColorStop(1, '#f39c12');
+  ctx.fillStyle = centerGrad;
+  ctx.fill();
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Center text
+  ctx.fillStyle = '#1a1a2e';
+  ctx.font = 'bold 16px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('吃！', 0, 0);
+
+  ctx.restore();
+}
+
+function getResultIndex(angle) {
+  // The pointer is at the top (12 o'clock = -PI/2 in canvas coords)
+  // We need to find which segment the pointer lands on
+  const normalizedAngle = ((2 * Math.PI - (angle % (2 * Math.PI))) + (Math.PI * 1.5)) % (2 * Math.PI);
+  const index = Math.floor(normalizedAngle / segAngle) % numSegments;
+  return index;
+}
+
+function spin() {
+  if (spinning) return;
+  spinning = true;
+  const btn = document.getElementById('spinBtn');
+  btn.classList.add('disabled');
+
+  const resultEl = document.getElementById('result');
+  resultEl.textContent = '转转转...';
+  resultEl.classList.remove('highlight');
+
+  // Random target: spin 5-8 full rotations + random offset
+  const extraSpins = 5 + Math.random() * 3;
+  const randomOffset = Math.random() * 2 * Math.PI;
+  const targetAngle = currentAngle + extraSpins * 2 * Math.PI + randomOffset;
+
+  const duration = 4000; // 4 seconds
+  const startTime = performance.now();
+  const startAngle = currentAngle;
+
+  function animate(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // Ease-out cubic
+    const eased = 1 - Math.pow(1 - progress, 3);
+    currentAngle = startAngle + (targetAngle - startAngle) * eased;
+
+    drawWheel(currentAngle);
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      spinning = false;
+      btn.classList.remove('disabled');
+
+      const idx = getResultIndex(currentAngle);
+      resultEl.innerHTML = `今天吃 <span class="result-emoji">${emojis[idx]}</span> <b>${dishes[idx]}</b>！`;
+      resultEl.classList.add('highlight');
+
+      // Sparkle effect
+      createSparkles();
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+function createSparkles() {
+  const sparkColors = ['#ff6b6b', '#ffc048', '#2ecc71', '#5dade2', '#ffeaa7', '#ff4757'];
+  for (let i = 0; i < 20; i++) {
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.style.left = Math.random() * 100 + 'vw';
+    s.style.top = Math.random() * 60 + 'vh';
+    s.style.background = sparkColors[Math.floor(Math.random() * sparkColors.length)];
+    s.style.width = (4 + Math.random() * 6) + 'px';
+    s.style.height = s.style.width;
+    s.style.animationDuration = (1 + Math.random() * 1.5) + 's';
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 2500);
+  }
+}
+
+// Initial draw
+drawWheel(currentAngle);
+</script>
+</body>
+</html>
