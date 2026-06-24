@@ -29,8 +29,8 @@ body {
 
 .wheel-container {
   position: relative;
-  width: 380px;
-  height: 380px;
+  width: 420px;
+  height: 420px;
 }
 
 .pointer {
@@ -57,8 +57,8 @@ body {
 }
 
 canvas {
-  width: 380px;
-  height: 380px;
+  width: 420px;
+  height: 420px;
   border-radius: 50%;
   box-shadow: 0 0 30px rgba(255,200,50,0.2), 0 0 60px rgba(0,0,0,0.3);
   cursor: pointer;
@@ -135,7 +135,7 @@ canvas {
 
 <div class="wheel-container">
   <div class="pointer"></div>
-  <canvas id="wheel" width="760" height="760"></canvas>
+  <canvas id="wheel" width="840" height="840"></canvas>
 </div>
 
 <div class="btn-wrap">
@@ -168,7 +168,7 @@ const lightColors = [
 
 const canvas = document.getElementById('wheel');
 const ctx = canvas.getContext('2d');
-const centerX = 380, centerY = 380, radius = 360;
+const centerX = 420, centerY = 420, radius = 400;
 const numSegments = dishes.length;
 const segAngle = (2 * Math.PI) / numSegments;
 
@@ -176,7 +176,7 @@ let currentAngle = 0;
 let spinning = false;
 
 function drawWheel(angle) {
-  ctx.clearRect(0, 0, 760, 760);
+  ctx.clearRect(0, 0, 840, 840);
   ctx.save();
   ctx.translate(centerX, centerY);
   ctx.rotate(angle);
@@ -208,15 +208,15 @@ function drawWheel(angle) {
     ctx.textBaseline = 'middle';
 
     // Emoji
-    ctx.font = '26px sans-serif';
-    ctx.fillText(emojis[i], radius * 0.55, -10);
+    ctx.font = '32px sans-serif';
+    ctx.fillText(emojis[i], radius * 0.52, -12);
 
     // Dish name
     ctx.fillStyle = '#fff';
-    ctx.font = 'bold 18px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.font = 'bold 22px "PingFang SC", "Microsoft YaHei", sans-serif';
     ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur = 3;
-    ctx.fillText(dishes[i], radius * 0.55, 16);
+    ctx.shadowBlur = 4;
+    ctx.fillText(dishes[i], radius * 0.52, 18);
     ctx.shadowBlur = 0;
 
     ctx.restore();
@@ -224,8 +224,8 @@ function drawWheel(angle) {
 
   // Center circle
   ctx.beginPath();
-  ctx.arc(0, 0, 42, 0, 2 * Math.PI);
-  const centerGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 42);
+  ctx.arc(0, 0, 48, 0, 2 * Math.PI);
+  const centerGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 48);
   centerGrad.addColorStop(0, '#ffeaa7');
   centerGrad.addColorStop(1, '#f39c12');
   ctx.fillStyle = centerGrad;
@@ -236,7 +236,7 @@ function drawWheel(angle) {
 
   // Center text
   ctx.fillStyle = '#1a1a2e';
-  ctx.font = 'bold 16px sans-serif';
+  ctx.font = 'bold 20px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('吃！', 0, 0);
