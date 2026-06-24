@@ -29,8 +29,8 @@ body {
 
 .wheel-container {
   position: relative;
-  width: 340px;
-  height: 340px;
+  width: 380px;
+  height: 380px;
 }
 
 .pointer {
@@ -57,8 +57,8 @@ body {
 }
 
 canvas {
-  width: 340px;
-  height: 340px;
+  width: 380px;
+  height: 380px;
   border-radius: 50%;
   box-shadow: 0 0 30px rgba(255,200,50,0.2), 0 0 60px rgba(0,0,0,0.3);
   cursor: pointer;
@@ -135,7 +135,7 @@ canvas {
 
 <div class="wheel-container">
   <div class="pointer"></div>
-  <canvas id="wheel" width="680" height="680"></canvas>
+  <canvas id="wheel" width="760" height="760"></canvas>
 </div>
 
 <div class="btn-wrap">
@@ -145,14 +145,30 @@ canvas {
 <div class="result-box" id="result"></div>
 
 <script>
-const dishes = ['手撕鸡', '紫米饭团', '煎饼', '麻辣烫', '牛杂粉', '猪油捞面'];
-const emojis = ['🍗', '🍙', '🥞', '🌶️', '🍜', '🍝'];
-const colors = ['#e74c3c', '#f39c12', '#27ae60', '#8e44ad', '#2980b9', '#d35400'];
-const lightColors = ['#ff6b6b', '#ffc048', '#2ecc71', '#a569bd', '#5dade2', '#e67e22'];
+const dishes = [
+  '手撕鸡', '紫米饭团', '煎饼', '麻辣烫', '牛杂粉', '猪油捞面',
+  '肉夹馍', '符记蒸饺', '薄皮蒸饺', '金稻香蒸饭', '铁板豆腐', '鹌鹑蛋',
+  '重庆小面', '寿司', '烤苕皮', '凉面'
+];
+const emojis = [
+  '🍗', '🍙', '🥞', '🌶️', '🍜', '🍝',
+  '🥙', '🥟', '🥟', '🍚', '🧈', '🥚',
+  '🫕', '🍣', '🥔', '🥗'
+];
+const colors = [
+  '#e74c3c', '#f39c12', '#27ae60', '#8e44ad', '#2980b9', '#d35400',
+  '#c0392b', '#16a085', '#2c3e50', '#e67e22', '#1abc9c', '#9b59b6',
+  '#3498db', '#e91e63', '#00bcd4', '#ff9800'
+];
+const lightColors = [
+  '#ff6b6b', '#ffc048', '#2ecc71', '#a569bd', '#5dade2', '#e67e22',
+  '#e57373', '#26d9a8', '#3d566e', '#f0a04b', '#48d1cc', '#b370cf',
+  '#5fa8d3', '#f06292', '#26c6da', '#ffb74d'
+];
 
 const canvas = document.getElementById('wheel');
 const ctx = canvas.getContext('2d');
-const centerX = 340, centerY = 340, radius = 320;
+const centerX = 380, centerY = 380, radius = 360;
 const numSegments = dishes.length;
 const segAngle = (2 * Math.PI) / numSegments;
 
@@ -160,7 +176,7 @@ let currentAngle = 0;
 let spinning = false;
 
 function drawWheel(angle) {
-  ctx.clearRect(0, 0, 680, 680);
+  ctx.clearRect(0, 0, 760, 760);
   ctx.save();
   ctx.translate(centerX, centerY);
   ctx.rotate(angle);
@@ -192,15 +208,15 @@ function drawWheel(angle) {
     ctx.textBaseline = 'middle';
 
     // Emoji
-    ctx.font = '32px sans-serif';
-    ctx.fillText(emojis[i], radius * 0.55, -8);
+    ctx.font = '26px sans-serif';
+    ctx.fillText(emojis[i], radius * 0.55, -10);
 
     // Dish name
     ctx.fillStyle = '#fff';
-    ctx.font = 'bold 24px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.font = 'bold 18px "PingFang SC", "Microsoft YaHei", sans-serif';
     ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur = 4;
-    ctx.fillText(dishes[i], radius * 0.55, 22);
+    ctx.shadowBlur = 3;
+    ctx.fillText(dishes[i], radius * 0.55, 16);
     ctx.shadowBlur = 0;
 
     ctx.restore();
@@ -229,8 +245,6 @@ function drawWheel(angle) {
 }
 
 function getResultIndex(angle) {
-  // The pointer is at the top (12 o'clock = -PI/2 in canvas coords)
-  // We need to find which segment the pointer lands on
   const normalizedAngle = ((2 * Math.PI - (angle % (2 * Math.PI))) + (Math.PI * 1.5)) % (2 * Math.PI);
   const index = Math.floor(normalizedAngle / segAngle) % numSegments;
   return index;
@@ -251,7 +265,7 @@ function spin() {
   const randomOffset = Math.random() * 2 * Math.PI;
   const targetAngle = currentAngle + extraSpins * 2 * Math.PI + randomOffset;
 
-  const duration = 4000; // 4 seconds
+  const duration = 4500; // 4.5 seconds, slightly longer for more items
   const startTime = performance.now();
   const startAngle = currentAngle;
 
